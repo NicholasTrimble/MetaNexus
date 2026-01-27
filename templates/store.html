@@ -33,10 +33,18 @@
             </ul>
 
             <div class="nav-actions">
-                <a href="#" class="signup-btn">Sign Up</a>
-                <a href="#" class="login-btn">Log In</a>
+                {% if user.is_authenticated %}
+                    <span style="color: white; margin-right: 15px;">Hello, {{ user.username }}</span>
+                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                    <button type="submit" class="login-btn" style="background:none; color:#ff7675; border-color:#ff7675;">Log Out</button>
+                    </form>
+
+                {% else %}
+                    <a href="{% url 'register' %}" class="login-btn" style="margin-right: 10px;">Sign Up</a>
+                    <a href="{% url 'login' %}" class="login-btn">Log In</a>
+                {% endif %}
             </div>
-        </div>
     </nav>
 
     <header class="hero">

@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign Up - MetaNexus</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body { 
+            display: flex; 
+            justify-content: 
+            center; align-items: 
+            center; height: 100vh; 
+            background-color: #0f1115; 
+        }
+        .auth-box { 
+            background: #181b21; 
+            padding: 40px; 
+            border-radius: 8px; 
+            width: 350px; 
+            border: 1px solid #2d3436; 
+            text-align: center; 
+        }
+        h2 { 
+            color: white; 
+            margin-bottom: 20px; 
+        }
+        input { 
+            width: 100%; 
+            padding: 10px; 
+            margin: 10px 0; 
+            background: #0f1115; 
+            border: 1px solid #333; 
+            color: white; border-radius: 4px; 
+        }
+        button { 
+            width: 100%; 
+            padding: 10px; 
+            background: #6c5ce7; 
+            color: white; 
+            border: none; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 10px; 
+        }
+        button:hover { 
+            background: #5649c0; 
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-box">
+        <h2>Sign Up</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Enter Nexus</button>
+        </form>
+        <p style="color: #aaa; margin-top: 15px; font-size: 0.9rem;">
+            Already have an account? <a href="{% url 'login' %}">Log In</a>
+        </p>
+    </div>
+</body>
+</html>

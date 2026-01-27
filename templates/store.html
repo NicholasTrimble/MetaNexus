@@ -70,6 +70,15 @@
                 <a href="?sort=price_asc" class="filter-btn">Price: Low to High</a>
                 <a href="?sort=price_desc" class="filter-btn">Price: High to Low</a>
             </div>
+
+            <div class="search-bar" style="margin-bottom: 20px;">
+                <form method="GET" action="{% url 'store' %}">
+                    <input type="text" name="q" placeholder="Search for a card..." value="{{ request.GET.q }}">
+                    <input type="hidden" name="game" value="{{ current_game }}">
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+
         </div>
 
         <div class="product-grid">

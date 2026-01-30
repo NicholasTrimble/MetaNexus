@@ -1,77 +1,124 @@
 from django.core.management.base import BaseCommand
 from store.models import Product
 import requests
+import random
 import time
 
 class Command(BaseCommand):
-    help = 'Populates DB by downloading every Set file from GitHub'
+    help = 'Imports the "Greatest Hits" Sets '
 
     def handle(self, *args, **kwargs):
+        
+        API_KEY = "tcg_92fb4c5b446341b3bbafea691cef4da0"
+
+
         self.stdout.write("Clearing old Pokemon data...")
         Product.objects.filter(game='PKM').delete()
 
-        sets_url = "https://raw.githubusercontent.com/PokemonTCG/pokemon-tcg-data/master/sets/en.json"
+        BASE_URL = "https://api.justtcg.com/v1"
+        HEADERS = {"x-api-key": API_KEY}
         
-        try:
-            self.stdout.write("Fetching list of Sets...")
-            response = requests.get(sets_url)
-            
-            if response.status_code != 200:
-                self.stdout.write(self.style.ERROR("Could not find Set list."))
+        TARGET_SETS = [
+            "Base Set",           
+            "Scarlet & Violet 151", 
+            "Evolving Skies",      
+            "Crown Zenith"         
+        ]
+
+        def get_set_id(name):
+            try:
+                response = requests.get(f"{BASE_URL}/sets", headers=HEADERS, params={"game": "Pokemon"})
+                response.raise_for_status()
+                sets = response.json().get("data", [])
+                for s in sets:
+                    if name.lower() == s['name'].lower():
+                        return s['id']
+                    if name.lower() in s['name'].lower():
+                        return s['id']
+            except Exception:
+                return None
+            return None
+
+        def fetch_set(set_name):
+            set_id = get_set_id(set_name)
+            if not set_id:
+                self.stdout.write(self.style.ERROR(f"Could not find Set ID for {set_name}"))
                 return
 
-            all_sets = response.json()
-            self.stdout.write(f"Found {len(all_sets)} sets. Starting import...")
+            self.stdout.write(f"\n--- Importing Set: {set_name} ---")
+            
+            url = f"{BASE_URL}/cards"
+            limit = 20 
+            offset = 0
+            has_more = True
 
-            total_cards = 0
-
-            for set_data in all_sets:
-                set_id = set_data['id']
-                set_name = set_data['name']
-                
-                cards_url = f"https://raw.githubusercontent.com/PokemonTCG/pokemon-tcg-data/master/cards/en/{set_id}.json"
+            while has_more:
+                params = {
+                    "set": set_id,
+                    "limit": limit,
+                    "offset": offset, 
+                }
                 
                 try:
-                    set_res = requests.get(cards_url)
-                    if set_res.status_code != 200:
-                        continue
+                    response = requests.get(url, headers=HEADERS, params=params)
+                    if response.status_code == 429:
+                        self.stdout.write(self.style.ERROR("Rate Limit Hit! Stopping for today."))
+                        return 
 
-                    cards = set_res.json()
+                    response.raise_for_status()
+                    data = response.json()
+                    cards = data.get("data", [])
                     
+                    if not cards:
+                        has_more = False
+                        break
+
                     batch = []
-                    
                     for card in cards:
-                        if 'images' not in card:
+                        try:
+                            image_url = card.get('image')
+                            
+                            market_price = 0.0
+                            variant_label = "Standard"
+                            
+                            if card.get("variants"):
+                                best_variant = max(
+                                    (v for v in card["variants"]), 
+                                    key=lambda x: x.get("price", 0)
+                                )
+                                market_price = best_variant.get("price", 0.0)
+                                variant_label = best_variant.get("printing", "Normal")
+                                if not image_url:
+                                    image_url = best_variant.get('image')
+
+                            if market_price > 0 and image_url:
+                                p = Product(
+                                    game='PKM',
+                                    name=card['name'],
+                                    price=market_price,
+                                    stock_count=random.randint(2, 5),
+                                    description=f"Set: {set_name}. {variant_label}",
+                                    image_url=image_url
+                                )
+                                batch.append(p)
+                        except Exception:
                             continue
 
-                        price = 0.00
-                        if 'tcgplayer' in card and 'prices' in card['tcgplayer']:
-                            prices = card['tcgplayer']['prices']
-                            if prices:
-                                first_type = list(prices.keys())[0]
-                                price = prices[first_type].get('mid', 0.0) or prices[first_type].get('market', 0.0)
-                        
-                        if price == 0:
-                            price = 5.00
+                    if batch:
+                        Product.objects.bulk_create(batch)
+                        self.stdout.write(f"Saved {len(batch)} cards... (Total saved: {Product.objects.count()})")
 
-                        p = Product(
-                            game='PKM',
-                            name=card['name'],
-                            price=price,
-                            stock_count=5,
-                            description=f"Set: {set_name}. Rarity: {card.get('rarity', 'Common')}",
-                            image_url=card['images']['small']
-                        )
-                        batch.append(p)
-                        total_cards += 1
-
-                    Product.objects.bulk_create(batch)
-                    self.stdout.write(f"Imported {set_name} ({len(batch)} cards)")
+                    offset += limit
+                    
+                    time.sleep(7) 
 
                 except Exception as e:
-                    self.stdout.write(self.style.ERROR(f"Error importing {set_name}: {e}"))
+                    self.stdout.write(self.style.ERROR(f"Error: {e}"))
+                    has_more = False
 
-            self.stdout.write(self.style.SUCCESS(f'GRAND TOTAL: Imported {total_cards} cards!'))
-
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f"Critical Error: {e}"))
+        self.stdout.write("Starting 'Greatest Hits' Import...")
+        
+        for s in TARGET_SETS:
+            fetch_set(s)
+            
+        self.stdout.write(self.style.SUCCESS("All Sets Imported Successfully!"))

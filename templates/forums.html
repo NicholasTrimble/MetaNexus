@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MetaNexus Forums</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Forum Specific Styles */
+        .game-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #888;
+            font-weight: 600;
+            transition: all 0.2s;
+            background: rgba(255,255,255,0.05);
+        }
+        .tab-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* The Discussion Rows */
+        .topic-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.03);
+            padding: 20px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 3px solid transparent;
+            transition: transform 0.2s;
+        }
+        .topic-row:hover {
+            transform: translateX(5px);
+            background: rgba(255,255,255,0.08);
+            border-left-color: var(--accent);
+        }
+        .topic-main { flex-grow: 1; }
+        .topic-title { 
+            font-size: 1.2rem; 
+            font-weight: 700; 
+            color: white; 
+            text-decoration: none; 
+            display: block; 
+            margin-bottom: 5px;
+        }
+        .topic-meta { font-size: 0.85rem; color: #888; }
+        .reply-count { 
+            text-align: center; 
+            min-width: 80px; 
+            color: #666; 
+            font-size: 0.9rem;
+            border-left: 1px solid #333;
+            padding-left: 15px;
+            margin-left: 15px;
+        }
+    </style>
+</head>
+<body class="theme-{{ current_game|default:'GEN' }}" style="background-color: #1a1a1d;">
+
+    <nav class="navbar" style="position: static; border-bottom: 1px solid #333;">
+        <div class="nav-container">
+            <a href="{% url 'store' %}?game={{ current_game }}" style="font-weight: bold; font-size: 1.2rem;">&larr; Back to Store</a>
+            <div class="nav-links">
+                <span style="color: white; font-weight: 800; letter-spacing: 1px;">COMMUNITY FORUMS</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 40px; color: white;">
+        
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1>{{ current_game }} Discussions</h1>
+            <a href="{% url 'create_topic' %}?game={{ current_game }}">
+                <button class="cta-btn">Start New Topic</button>
+            </a>
+        </div>
+
+        <div class="game-tabs">
+            <a href="?game=MTG" class="tab-btn {% if current_game == 'MTG' %}active{% endif %}">Magic</a>
+            <a href="?game=PKM" class="tab-btn {% if current_game == 'PKM' %}active{% endif %}">Pokemon</a>
+            <a href="?game=YGO" class="tab-btn {% if current_game == 'YGO' %}active{% endif %}">Yu-Gi-Oh!</a>
+            <a href="?game=GEN" class="tab-btn {% if current_game == 'GEN' %}active{% endif %}">General</a>
+        </div>
+
+        <div class="forum-list">
+            {% for topic in topics %}
+                <div class="topic-row">
+                    <div class="topic-main">
+                        <a href="{% url 'topic_detail' topic.pk %}" class="topic-title">{{ topic.title }}</a>
+                        <div class="topic-meta">
+                            Started by <strong style="color: var(--accent);">{{ topic.author }}</strong> &bull; {{ topic.created_at|date:"M d, Y" }}
+                        </div>
+                    </div>
+                    <div class="reply-count">
+                        <div style="font-size: 1.2rem; color: white; font-weight: bold;">{{ topic.comments.count }}</div>
+                        <div>Replies</div>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="text-align: center; padding: 60px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 2px dashed #333;">
+                    <h3 style="color: #666;">No discussions yet.</h3>
+                    <p style="color: #444; margin-bottom: 20px;">Be the first to post in the {{ current_game }} lobby!</p>
+                    <a href="{% url 'create_topic' %}?game={{ current_game }}" class="cta-btn">Create Topic</a>
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+</body>
+</html>

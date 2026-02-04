@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ topic.title }} | MetaNexus</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body class="theme-{{ current_game|default:'GEN' }}" style="background-color: #1a1a1d;">
+
+    <nav class="navbar" style="position: static; border-bottom: 1px solid #333;">
+        <div class="nav-container">
+            <a href="{% url 'forum_home' %}?game={{ current_game }}" style="font-weight: bold; font-size: 1.2rem;">&larr; Back to Forums</a>
+            <div class="nav-links">
+                <span style="color: white;">{{ topic.get_game_category_display }} DISCUSSION</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 40px; color: white; max-width: 900px;">
+        
+        <div class="product-card" style="padding: 30px; margin-bottom: 30px; display: block; border-color: var(--accent);">
+            <h1 style="margin-bottom: 10px; font-size: 2rem;">{{ topic.title }}</h1>
+            <div style="color: #888; margin-bottom: 20px; font-size: 0.9rem; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                Posted by <strong style="color: var(--accent);">{{ topic.author }}</strong> on {{ topic.created_at|date:"M d, Y" }}
+            </div>
+            <div style="font-size: 1.1rem; line-height: 1.6;">
+                {{ topic.description|linebreaks }}
+            </div>
+        </div>
+
+        <h3 style="border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px;">
+            Replies ({{ topic.comments.count }})
+        </h3>
+
+        <div class="comments-list">
+            {% for comment in topic.comments.all %}
+                <div class="product-card" style="padding: 15px; margin-bottom: 15px; display: block; background-color: rgba(255,255,255,0.03);">
+                    <div style="margin-bottom: 10px; font-size: 0.85rem; color: #888;">
+                        <strong style="color: white;">{{ comment.author }}</strong> replied:
+                    </div>
+                    <p>{{ comment.body|linebreaks }}</p>
+                </div>
+            {% empty %}
+                <p style="color: #888; font-style: italic;">No replies yet.</p>
+            {% endfor %}
+        </div>
+
+        <div class="reply-section" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #444;">
+            {% if user.is_authenticated %}
+                <h3 style="margin-bottom: 15px;">Post a Reply</h3>
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ comment_form.body }}
+                    <button type="submit" class="cta-btn" style="margin-top: 10px;">Post Reply</button>
+                </form>
+            {% else %}
+                <p>Please <a href="{% url 'login' %}" style="color: var(--accent);">log in</a> to reply.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

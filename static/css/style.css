@@ -59,13 +59,14 @@ ul { list-style: none; }
 /* --- HERO SECTION --- */
 .hero {
   position: relative;
-  height: 300px;
-  overflow: hidden;
+  min-height: 400px;
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   margin-bottom: 2rem;
+  padding: 40px 0;
 }
 
 
@@ -242,7 +243,7 @@ html{
 }
 
 .theme-PKM .navbar {
-    background-color: rgba(235, 252, 1, 0.95);
+    background-color: rgba(234, 1, 1, 0.95);
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -251,7 +252,7 @@ html{
 }
 
 .theme-PKM .container {
-    background-color: rgba(21, 0, 255, 0.95);
+    background-color: rgba(251, 251, 251, 0.95);
 
 }
 .theme-PKM .logo, .theme-PKM .nav-links a {
@@ -260,11 +261,14 @@ html{
 
 .theme-YGO .hero{
    
-    --bg-dark: #050510;
-    --bg-card: #0e0e1f;
-    --accent: #b33939;
-    --accent-hover: #d63031;
-    --border-color: #1e272e;
+    --bg-dark: #f4f6f8;
+    --bg-card: #ffffff;
+    --text-main: #2d3436;
+    --text-muted: #636e72;
+    --accent: #ffcb05;
+    --accent-hover: #dbaf00;
+    --price-color: #e3350d;
+    --border-color: #dfe6e9;
     
     background-image: linear-gradient(rgba(5, 5, 16, 0.9), rgba(5, 5, 16, 0.9)), url('../images/ygo_bg.jpg');
     background-size: cover;
@@ -295,4 +299,17 @@ html{
     background-size: cover;
     background-position: center;
     opacity: 0.9;
+}
+
+
+.theme-YGO .nav-links a:hover {
+    color: #db1701;
+}
+
+.theme-YGO .container {
+    background-color: rgba(77, 43, 1, 0.95);
+
+}
+.theme-YGO .logo, .theme-YGO .nav-links a {
+    color: #2d3436;
 }

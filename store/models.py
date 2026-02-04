@@ -15,22 +15,37 @@ class Product(models.Model):
     description = models.TextField()
     image_url = models.URLField(max_length=200)
 
+    #filtering by color for MTG
+    COLOR_CHOICES = [
+        ('W', 'White'),
+        ('U', 'Blue'),
+        ('B', 'Black'),
+        ('R', 'Red'),
+        ('G', 'Green'),
+        ('C', 'Colorless'),
+        ('M', 'Multicolor'),
+    ]
+    color = models.CharField(max_length=1, choices=COLOR_CHOICES, blank=True, null=True)
+    card_type = models.CharField(max_length=50, blank=True, null=True)
+
     def __str__(self):
         return self.name
 
+
 class Deck(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='decks')
     name = models.CharField(max_length=100, default="New Deck")
     game = models.CharField(max_length=3, choices=Product.GAME_CHOICES, default='MTG')
-    date_created = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.name} ({self.user.username})"
 
 class DeckCard(models.Model):
-    deck = models.ForeignKey(Deck, on_delete=models.CASCADE)
+    # I renamed related_name to 'cards' so you can do 'my_deck.cards.all()'
+    deck = models.ForeignKey(Deck, on_delete=models.CASCADE, related_name='cards')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=1)
+    quantity = models.PositiveIntegerField(default=1)
 
     def __str__(self):
-        return f"{self.quantity}x {self.product.name}"
+        return f"{self.quantity}x {self.product.name} in {self.deck.name}"

@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ deck.name }} | Deck Builder</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="theme-MTG" style="background-color: #1a1a1d;">
+
+    <nav class="navbar" style="border-bottom: 1px solid #333;">
+        <div class="nav-container">
+            <a href="{% url 'deck_list' %}" style="font-weight: bold; font-size: 1.1rem;">&larr; Back to My Decks</a>
+            <div class="nav-links">
+                <span style="color: white;">EDITING: <strong>{{ deck.name }}</strong></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 50px; color: white;">
+        
+        <div class="section-header" style="margin-bottom: 30px; display: flex; justify-content: space-between;">
+            <div>
+                <h1>{{ deck.name }}</h1>
+                <p style="color: #888;">{{ deck_cards.count }} Unique Cards</p>
+            </div>
+            </div>
+
+        <div class="product-grid">
+            {% for item in deck_cards %}
+                <div class="product-card">
+                    <div class="card-image">
+                        <span style="position: absolute; top: 10px; right: 10px; background: var(--accent); color: white; padding: 5px 10px; border-radius: 50%; font-weight: bold;">
+                            x{{ item.quantity }}
+                        </span>
+                        {% if item.product.image_url %}
+                            <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}">
+                        {% else %}
+                            <div class="placeholder-image">{{ item.product.name|slice:":2" }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-info">
+                        <h3>{{ item.product.name }}</h3>
+                        
+                        <a href="{% url 'remove_from_deck' deck.id item.product.id %}" 
+                           class="cta-btn" 
+                           style="background: #e74c3c; width: 100%; text-align: center; display: block; margin-top: 10px;">
+                            Remove
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 50px; color: #666;">
+                    <h2>This deck is empty!</h2>
+                    <p>Go to the Store to add cards.</p>
+                    <a href="{% url 'store' %}" class="cta-btn" style="margin-top: 20px; display: inline-block;">Go to Store</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Start Discussion | MetaNexus</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Custom form styles to match your dark theme */
+        .form-group { margin-bottom: 20px; }
+        
+        label { 
+            display: block; 
+            color: #888; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 15px;
+            background: #222;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+    </style>
+</head>
+<body class="theme-{{ current_game|default:'GEN' }}" style="background-color: #1a1a1d;">
+
+    <nav class="navbar" style="position: static; border-bottom: 1px solid #333;">
+        <div class="nav-container">
+            <a href="{% url 'forum_home' %}?game={{ current_game }}" style="font-weight: bold; font-size: 1.2rem;">&larr; Cancel</a>
+            <div class="nav-links">
+                <span style="color: white;">NEW {{ current_game }} TOPIC</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 50px; color: white; max-width: 800px;">
+        
+        <div class="section-header">
+            <h1>Start a Discussion</h1>
+            <p style="color: #aaa;">Post a new topic to the {{ current_game }} board.</p>
+        </div>
+
+        <form method="POST" action="">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Topic Title</label>
+                {{ form.title }}
+            </div>
+
+            <div class="form-group">
+                <label>Discussion Content</label>
+                {{ form.description }}
+            </div>
+
+            <button type="submit" class="cta-btn" style="width: 100%; font-size: 1.1rem; padding: 15px;">Post Topic</button>
+        </form>
+
+    </div>
+</body>
+</html>

@@ -18,10 +18,9 @@
 
             <ul class="nav-links">
                 <li><a href="{% url 'store' %}?game=MTG" class="{% if current_game == 'MTG' %}active{% endif %}">Magic</a></li>
-                <li><a href="{% url 'store' %}?game=PKM" class="{% if current_game == 'PKM' %}active{% endif %}">Pokemon</a></li>
-                <li><a href="{% url 'store' %}?game=YGO" class="{% if current_game == 'YGO' %}active{% endif %}">YuGiOh!</a></li>
-                
-                <li><a href="#">Decks</a></li>
+                <li><a href="{% url 'deck_list' %}">Decks</a></li>
+            
+                <li><a href="{% url 'forum_home' %}?game={{ current_game }}">Forums</a></li>
                 <li>
                     <a href="https://store.tcgplayer.com/buylist" target="_blank">Sell Cards</a>                
                 </li>
@@ -42,15 +41,40 @@
         </div>
     </nav>
 
-    <header class="hero">
-        <div class="bg-rotator" style="background-image: url('{% static 'images/cards-symbols.jpg' %}');"></div>
-        <div class="hero-content">
-            <a href="#" class="logo">Meta<span class="highlight">Nexus</span></a>
-            <h1>Build Your Deck Your Way</h1>
-            <p>Yours to build, yours to play. Collect, connect and trade. Join the MetaNexus community today.</p>
-            <a href="#marketplace" class="cta-btn">Browse Collection</a>
+   <header class="hero">
+    <div class="bg-rotator" style="background-image: url('{% static 'images/cards-symbols.jpg' %}');"></div>
+    
+<div class="hero-content">
+    <a href="#" class="logo">Meta<span class="highlight">Nexus</span></a>
+    
+    <h1 style="font-size: 2.5rem; margin-bottom: 5px; line-height: 1.1;">
+        The Ultimate <span style="color: #a29bfe;">MTG</span> Deck Builder
+    </h1>
+    
+    <p style="font-size: 1rem; max-width: 700px; margin: 5px auto 15px auto;">
+        Collect, connect, and trade. Craft your perfect deck today.
+    </p>
+    
+    <div class="hero-actions" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        
+        <a href="{% url 'store' %}?game=MTG" class="cta-btn" style="padding: 10px 30px; font-size: 1.1rem;">
+            Browse Magic Cards
+        </a>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: #aaa; font-size: 1.0rem; height: 0.5rem; text-transform: uppercase;">Explore More Games (Coming soon):</span>
+            <a href="{% url 'store' %}?game=PKM" class="cta-btn" style="background: transparent; border: 5px solid #e6ff01; padding: 4px 12px; font-size: 0.75rem;">
+                Pokemon
+            </a>
+            <a href="{% url 'store' %}?game=YGO" class="cta-btn" style="background: transparent; border: 5px solid #784502; padding: 4px 12px; font-size: 0.75rem;">
+                Yu-Gi-Oh!
+            </a>
         </div>
-    </header>
+    </div>
+</div>
+</header>
+
+
 
     <main class="container" id="marketplace">
         <div class="section-header">
@@ -62,16 +86,77 @@
                 <a href="?sort=price_desc&game={{ current_game }}&q={{ request.GET.q }}" class="filter-btn">Price: High to Low</a>
             </div>
 
+            <div class="color-filters" style="display: flex; gap: 10px; margin: 15px 0; align-items: center;">
+                <span style="color: #aaa; font-weight: bold; font-size: 0.9rem;">Color:</span>
+                
+                <a href="?game={{ current_game }}&color=W" title="White" 
+                style="width: 25px; height: 25px; background: #f8f8f8; border-radius: 50%; border: 2px solid {% if current_color == 'W' %}var(--accent){% else %}#444{% endif %};"></a>
+                
+                <a href="?game={{ current_game }}&color=U" title="Blue"
+                style="width: 25px; height: 25px; background: #0e68ab; border-radius: 50%; border: 2px solid {% if current_color == 'U' %}var(--accent){% else %}#444{% endif %};"></a>
+
+                <a href="?game={{ current_game }}&color=B" title="Black"
+                style="width: 25px; height: 25px; background: #150b00; border-radius: 50%; border: 2px solid {% if current_color == 'B' %}var(--accent){% else %}#444{% endif %};"></a>
+
+                <a href="?game={{ current_game }}&color=R" title="Red"
+                style="width: 25px; height: 25px; background: #d3202a; border-radius: 50%; border: 2px solid {% if current_color == 'R' %}var(--accent){% else %}#444{% endif %};"></a>
+
+                <a href="?game={{ current_game }}&color=G" title="Green"
+                style="width: 25px; height: 25px; background: #00733e; border-radius: 50%; border: 2px solid {% if current_color == 'G' %}var(--accent){% else %}#444{% endif %};"></a>
+                
+                
+            
+                <a href="?game={{ current_game }}&color=C" title="Colorless"
+                style="width: 25px; height: 25px; background: #d3d3d3; border-radius: 50%; border: 2px solid {% if current_color == 'C' %}var(--accent){% else %}#444{% endif %}; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"></a>
+
+                <a href="?game={{ current_game }}&color=M" title="Multicolored"
+                style="width: 25px; height: 25px; background: #d4af37; border-radius: 50%; border: 2px solid {% if current_color == 'M' %}var(--accent){% else %}#444{% endif %}; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"></a>
+                
+                <a href="?game={{ current_game }}" style="font-size: 0.8rem; color: #888; text-decoration: underline; margin-left: 10px;">Reset</a>
+            
+            </div>
+
+
+
             <div class="search-bar" style="margin-bottom: 20px;">
                 <form method="GET" action="{% url 'store' %}">
-                    <input type="text" name="q" placeholder="Search for a card..." value="{{ request.GET.q }}">
+                    <input type="text" name="q" id="search-input" placeholder="Search cards..." value="{{ request.GET.q }}">
                     <input type="hidden" name="game" value="{{ current_game }}">
                     <button type="submit">Search</button>
                 </form>
             </div>
         </div>
 
-        <div class="product-grid">
+
+        {% if user.is_authenticated %}
+        <div class="deck-selector-bar" style="background: #222; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #444; display: flex; align-items: center; justify-content: space-between;">
+            
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label for="active-deck" style="color: #aaa; font-weight: bold;">Adding to Deck:</label>
+                
+                <select id="active-deck" style="padding: 8px 12px; border-radius: 4px; background: #333; color: white; border: 1px solid #555; cursor: pointer; min-width: 200px;">
+                    {% for deck in user_decks %}
+                        <option value="{{ deck.id }}">{{ deck.name }}</option>
+                    {% empty %}
+                        <option value="">No Decks Found (Create one first!)</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <a href="{% url 'deck_list' %}" style="color: var(--accent); font-size: 0.9rem; text-decoration: none; font-weight: 600;">
+                Manage Decks &rarr;
+            </a>
+        </div>
+        {% else %}
+            <div style="margin-bottom: 20px; padding: 15px; background: rgba(162, 155, 254, 0.1); border: 1px solid var(--accent); border-radius: 8px; text-align: center;">
+                <p style="color: #ccc; margin: 0;">
+                    <a href="{% url 'login' %}" style="color: var(--accent); font-weight: bold;">Log in</a> to start building decks!
+                </p>
+            </div>
+        {% endif %}
+
+
+        <div class="product-grid" id="product-grid">
             {% for product in products %}
             <div class="product-card">
                 <div class="card-image">
@@ -86,7 +171,10 @@
                     <h3 class="card-title">{{ product.name }}</h3>
                     <div class="card-footer">
                         <span class="price">${{ product.price }}</span>
-                        <button class="add-btn">Add</button>
+                        <button class="add-btn" onclick="addToDeck({{ product.id }})">
+                            Add to Deck
+                        </button>
+
                     </div>
                 </div>
             </div>
@@ -120,4 +208,98 @@
     </footer>
 
 </body>
+
+
+<script>
+    document.getElementById('search-input').addEventListener('input', function(e) {
+        const query = e.target.value;
+        const grid = document.getElementById('product-grid');
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const game = urlParams.get('game') || 'MTG';
+
+        fetch(`/api/search/?q=${query}&game=${game}`)
+        .then(response => response.json())
+        .then(data => {
+            grid.innerHTML = '';
+            
+            if (data.results.length === 0) {
+                grid.innerHTML = '<p style="color:#888; text-align:center; grid-column:1/-1;">No cards found.</p>';
+                return;
+            }
+
+            data.results.forEach(product => {
+                let imageHtml = '';
+                if (product.image_url) {
+                    imageHtml = `<img src="${product.image_url}" alt="${product.name}">`;
+                } else {
+                    imageHtml = `<div class="placeholder-image">${product.name.substring(0,2)}</div>`;
+                }
+
+                const cardHtml = `
+                    <div class="product-card">
+                        <div class="card-image">
+                            ${imageHtml}
+                        </div>
+                        <div class="card-info">
+                            <h3>${product.name}</h3>
+                            <p class="price">$${product.price}</p>
+                            
+                            <button class="add-btn" onclick="addToDeck(${product.id})">
+                                Add to Deck
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                grid.innerHTML += cardHtml;
+            });
+        });
+    });
+</script>
+
+
+
+
+<script>
+    function addToDeck(productId) {
+        const deckSelect = document.getElementById('active-deck');
+        
+        if (!deckSelect) {
+            alert("Please log in to add cards to a deck.");
+            return;
+        }
+        
+        const deckId = deckSelect.value;
+        if (!deckId) {
+            alert("Please create a deck first!");
+            return;
+        }
+
+        fetch("{% url 'add_card_to_deck' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ 
+                product_id: productId,
+                deck_id: deckId 
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message);
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Something went wrong. Check the console.");
+        });
+    }
+</script>
+
 </html>

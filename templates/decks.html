@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Decks | MetaNexus</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Small override to make the input field look good on the dark background */
+        .deck-input {
+            padding: 10px 15px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background: #222;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            width: 250px;
+        }
+        .deck-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+    </style>
+</head>
+<body class="theme-MTG" style="background-color: #1a1a1d;">
+
+    <nav class="navbar" style="position: static; border-bottom: 1px solid #333;">
+        <div class="nav-container">
+            <a href="{% url 'store' %}" style="font-weight: bold; font-size: 1.2rem;">&larr; Back to Store</a>
+            <div class="nav-links">
+                <span style="color: white; font-weight: 800; letter-spacing: 1px;">DECK BUILDER</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 50px; color: white;">
+        
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1>My Decks</h1>
+            
+            <form method="POST" action="{% url 'create_deck' %}" style="display: flex; gap: 10px;">
+                {% csrf_token %}
+                <input type="text" name="name" class="deck-input" placeholder="New Deck Name (e.g. Red Aggro)" required>
+                <button type="submit" class="cta-btn">Create New Deck</button>
+            </form>
+        </div>
+
+        <div class="product-grid">
+            {% for deck in decks %}
+                <div class="product-card" style="padding: 25px; display: block; border-left: 4px solid var(--accent);">
+                    
+                    <h2 style="font-size: 1.4rem; margin-bottom: 5px;">{{ deck.name }}</h2>
+                    
+                    <p style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">
+                        {{ deck.cards.count }} Cards &bull; Created {{ deck.created_at|date:"M d" }}
+                    </p>
+
+                    <div style="display: flex; gap: 10px;">
+                        <a href="{% url 'deck_detail' deck.id %}" class="cta-btn" style="padding: 8px 20px; font-size: 0.9rem; width: 100%; text-align: center;">
+                            Edit Deck
+                        </a>
+                        <a href="{% url 'delete_deck' deck.id %}" style="padding: 8px 15px; background: #e74c3c; color: white; border-radius: 4px; text-decoration: none; font-weight: 600;">
+                            Delete
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px; background: rgba(255,255,255,0.03); border: 2px dashed #444; border-radius: 8px;">
+                    <h3 style="color: #666; margin-bottom: 10px;">No decks found.</h3>
+                    <p style="color: #888;">Create your first deck above to get started!</p>
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+</body>
+</html>

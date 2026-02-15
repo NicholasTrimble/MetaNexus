@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-szt!5-*#s5-2ig%c3#bi8!2ba6%jdltgt0lq!d#$t%0m^!_8d4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'nicktrimble.pythonanywhere.com',
+    'localhost',
+    '127.0.0.1'
+]
 
 
 # Application definition

@@ -7,57 +7,61 @@ class Command(BaseCommand):
     help = 'Populate the database with cards'
 
     def handle(self, *args, **kwargs):
-        
-        
         self.stdout.write("Clearing old MTG data...")
         Product.objects.filter(game='MTG').delete()
 
         url = "https://api.scryfall.com/cards/search?q=game:paper&order=usd&dir=desc"
-        
         count = 0
         
-        
+        # 1. Create a Session to keep the connection alive
+        session = requests.Session()
+        # 2. Add a User-Agent so Scryfall knows who you are
+        session.headers.update({
+            'User-Agent': 'MetaNexusPortfolioProject/1.0',
+            'Accept': 'application/json'
+        })
+
         while url:
             self.stdout.write(f"Fetching page... (Cards imported so far: {count})")
             
-            
-            response = requests.get(url)
-            
-           
-            if response.status_code != 200:
-                self.stdout.write(self.style.ERROR(f'Error connecting: {response.status_code}'))
-                break
+            try:
+                # Use session.get instead of requests.get, and add a timeout
+                response = session.get(url, timeout=15)
+                
+                if response.status_code != 200:
+                    self.stdout.write(self.style.ERROR(f'Error connecting: {response.status_code}'))
+                    break
 
-            data = response.json()
-            cards = data.get('data', [])
+                data = response.json()
+                cards = data.get('data', [])
 
-            
-            for card in cards:
-                try:
-                    
-                    if 'prices' in card and card['prices'].get('usd') and 'image_uris' in card:
-                        
-                        Product.objects.create(
-                            game='MTG',
-                            name=card['name'],
+                for card in cards:
+                    try:
+                        if 'prices' in card and card['prices'].get('usd') and 'image_uris' in card:
+                            Product.objects.create(
+                                game='MTG',
+                                name=card['name'],
+                                price=float(card['prices']['usd']),
+                                stock_count=5, 
+                                description=card.get('oracle_text', 'No description.'),
+                                image_url=card['image_uris']['normal'],
+                                cmc=card.get('cmc', 0.0),
+                            )
+                            count += 1
                             
-                            price=float(card['prices']['usd']),
-                            stock_count=5, 
-                            description=card.get('oracle_text', 'No description.'),
-                            image_url=card['image_uris']['normal']
-                        )
-                        count += 1
-                        
-                except Exception as e:
-                    
-                    print(f"Skipped {card.get('name', 'unknown')}: {e}")
+                    except Exception as e:
+                        print(f"Skipped {card.get('name', 'unknown')}: {e}")
 
-            if data.get('has_more'):
-                
-                url = data.get('next_page')
-                
-                time.sleep(0.1)
-            else:
-                url = None
+                if data.get('has_more'):
+                    url = data.get('next_page')
+                    time.sleep(0.15) # Bumped slightly to 150ms to be extra safe
+                else:
+                    url = None
+
+            # 3. If Windows forces the connection closed, catch it and retry!
+            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+                self.stdout.write(self.style.WARNING(f"Connection dropped. Sleeping for 5 seconds and retrying page..."))
+                time.sleep(5)
+                # We DON'T change the url here, so the while loop just retries the exact same page!
 
         self.stdout.write(self.style.SUCCESS(f'Done! Imported {count} cards.'))

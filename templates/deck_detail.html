@@ -19,12 +19,35 @@
 
     <div class="container" style="padding-top: 50px; color: white;">
         
-        <div class="section-header" style="margin-bottom: 30px; display: flex; justify-content: space-between;">
+        <div class="section-header" style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <h1>{{ deck.name }}</h1>
-                <p style="color: #888;">{{ deck_cards.count }} Unique Cards</p>
+                <p style="color: #888;">
+                    {{ deck_cards.count }} Unique Cards &bull; 
+                    <strong style="color: #2ecc71;">${{ total_price|floatformat:2 }} Total Value</strong>
+                </p>
             </div>
+            
+            <div style="width: 300px; height: 250px;">
+                <canvas id="manaCurveChart"></canvas>
             </div>
+            
+            <div>
+                <button onclick="exportDeck()" class="cta-btn" style="background: #3498db; padding: 10px 20px; font-weight: bold; border: none; cursor: pointer;">
+                    Export to Text
+                </button>
+            </div>
+        </div>
+
+
+
+            
+            <div>
+                <button onclick="exportDeck()" class="cta-btn" style="background: #3498db; padding: 10px 20px; font-weight: bold; border: none; cursor: pointer;">
+                    Export to Text
+                </button>
+            </div>
+        </div>
 
         <div class="product-grid">
             {% for item in deck_cards %}
@@ -59,6 +82,82 @@
             {% endfor %}
         </div>
     </div>
+
+
+<textarea id="exportTextarea" style="display:none;">{{ export_text }}</textarea>
+
+    <script>
+        function exportDeck() {
+            const textToCopy = document.getElementById('exportTextarea').value;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert("Decklist copied to clipboard!");
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert("Failed to copy. Please try again.");
+            });
+        }
+    </script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const manaData = JSON.parse('{{ mana_curve|safe }}');
+        const ctx = document.getElementById('manaCurveChart').getContext('2d');
+        const highestCount = Math.max(...Object.values(manaData));
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(manaData), 
+                datasets: [{
+                    label: 'Cards',
+                    data: Object.values(manaData), 
+                    backgroundColor: '#1400ae', 
+                    borderRadius: 4 
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }, 
+                    tooltip: { enabled: true },
+                    title: {
+                        display: true,
+                        text: 'Chart for mana assessment',
+                        color: '#fff',
+                        font: { size: 16, weight: 'bold' }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        suggestedMax: highestCount + 2,
+                        ticks: { stepSize: 1, color: '#888', autoSkip: false }, 
+                        grid: { color: '#333' },
+                        title: {
+                            display: true,
+                            text: 'Number of Cards',
+                            color: '#888',
+                            font: { size: 12 }
+                        }
+                    },
+                    x: {
+                        ticks: { color: '#888' },
+                        grid: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Mana Cost',
+                            color: '#888',
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
 
 </body>
 </html>

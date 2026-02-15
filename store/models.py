@@ -27,6 +27,7 @@ class Product(models.Model):
     ]
     color = models.CharField(max_length=1, choices=COLOR_CHOICES, blank=True, null=True)
     card_type = models.CharField(max_length=50, blank=True, null=True)
+    cmc = models.FloatField(default=0.0)
 
     def __str__(self):
         return self.name
@@ -42,7 +43,6 @@ class Deck(models.Model):
         return f"{self.name} ({self.user.username})"
 
 class DeckCard(models.Model):
-    # I renamed related_name to 'cards' so you can do 'my_deck.cards.all()'
     deck = models.ForeignKey(Deck, on_delete=models.CASCADE, related_name='cards')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)

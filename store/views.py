@@ -132,9 +132,32 @@ def deck_detail(request, deck_id):
     
     deck_cards = deck.cards.all().select_related('product')
     
+    total_price = sum(item.product.price * item.quantity for item in deck_cards)
+    
+    export_text = ""
+    mana_curve = {'0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7+': 0}
+    
+    for item in deck_cards:
+        export_text += f"{item.quantity} {item.product.name}\n"
+        
+        try:
+            cmc = int(float(item.product.cmc))
+        except (ValueError, TypeError):
+            cmc = 0
+            
+        card_type = str(item.product.card_type) if item.product.card_type else ""
+        if "Land" not in card_type:
+            if cmc >= 7:
+                mana_curve['7+'] += item.quantity
+            else:
+                mana_curve[str(cmc)] += item.quantity
+    
     context = {
         'deck': deck,
-        'deck_cards': deck_cards
+        'deck_cards': deck_cards,
+        'total_price': total_price,
+        'export_text': export_text,
+        'mana_curve': json.dumps(mana_curve) 
     }
     return render(request, 'deck_detail.html', context)
 

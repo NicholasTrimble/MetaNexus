@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ room_name|title }} - MetaNexus Chat</title>
+    <style>
+        /* Basic dark theme to match your MetaNexus vibe */
+        body { background-color: #121212; color: #ffffff; font-family: sans-serif; padding: 20px; }
+        #chat-log { 
+            width: 100%; max-width: 600px; height: 300px; 
+            background-color: #1e1e1e; border: 1px solid #333; 
+            padding: 15px; overflow-y: auto; margin-bottom: 10px; border-radius: 5px;
+        }
+        #chat-message-input { width: 70%; max-width: 450px; padding: 10px; border-radius: 4px; border: 1px solid #555; }
+        #chat-message-submit { padding: 10px 20px; background-color: #1400ae; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        #chat-message-submit:hover { background-color: #2a11db; }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the {{ room_name|title }}</h1>
+    
+    <div id="chat-log"></div>
+    
+    <input id="chat-message-input" type="text" placeholder="Type a message...">
+    <button id="chat-message-submit">Send</button>
+
+    {{ room_name|json_script:"room-name" }}
+
+    <script>
+        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const chatLog = document.querySelector('#chat-log');
+            
+            chatLog.innerHTML += '<div style="margin-bottom: 8px;"><b>' + data.username + ':</b> ' + data.message + '</div>';
+            chatLog.scrollTop = chatLog.scrollHeight; 
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function(e) {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+            
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }));
+            
+            messageInputDom.value = ''; 
+        };
+
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.key === 'Enter') {
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+    </script>
+</body>
+</html>
